@@ -11,7 +11,7 @@ public class DBManager
     private static final String SQLITE_PREFIX = "jdbc:sqlite:";
     private static final String DB_FOLDER = "databases";
 
-    private static TreeMap<String, Connection> connections_ =  new TreeMap<>();
+    private static TreeMap<String, Database> databases_ =  new TreeMap<>();
 
     public static void initConnection(String db_name) throws DBException
     {
@@ -36,7 +36,7 @@ public class DBManager
             if (connection == null)
                 throw new DBException("connection for db '" + db_name + "' is null");
 
-            connections_.put(db_name, connection);
+            databases_.put(db_name, new Database(connection));
         }
         catch (SQLException ex)
         {
@@ -44,9 +44,9 @@ public class DBManager
         }
     }
 
-    public static Connection getDBConnection(String db_name)
+    public static Database getDBConnection(String db_name)
     {
-        return connections_.get(db_name);
+        return databases_.get(db_name);
     }
 
     private static void createDBFolderIfNotExists() throws DBException
