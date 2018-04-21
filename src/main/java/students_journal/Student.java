@@ -19,6 +19,7 @@ public class Student
     private static final String BIRTHDAY = "birthday";
 
     private static ArrayList<String> fields_;
+    private static ArrayList<String> nullable_fields_;
 
     static
     {
@@ -29,6 +30,9 @@ public class Student
         fields_.add(PATRONYMIC);
         fields_.add(GROUP);
         fields_.add(BIRTHDAY);
+
+        nullable_fields_ = new ArrayList<>();;
+        nullable_fields_.add(PATRONYMIC);
     }
 
     private TreeMap<String, String> values_ = new TreeMap<>();
@@ -120,10 +124,19 @@ public class Student
         return Integer.valueOf(values_.get(ID));
     }
 
-    boolean setFieldByName(String field, String value)
+    public void setFieldByName(String field, String value) throws InvalidDataException
     {
+        if (value.equals("null"))
+            value = null;
+
+        if (field == null)
+            throw new InvalidDataException("field is null");
+
         if (!fields_.contains(field))
-            return false;
+            throw new InvalidDataException("invalid field " + field);
+
+        if (!nullable_fields_.contains(field) && value == null)
+            throw new InvalidDataException("field " + field + " can't be nullable");
 
         if (field.equals(BIRTHDAY))
         {
@@ -133,15 +146,11 @@ public class Student
             }
             catch (ParseException ex)
             {
-                return false;
+                throw new InvalidDataException("date must be in format dd.MM.yyyy", ex);
             }
         }
 
-        if (value.equals("null"))
-            value = null;
-
         values_.put(field, value);
-        return true;
     }
 
     @Override
@@ -193,6 +202,11 @@ public class Student
     static int fieldsNum()
     {
         return fields_.size();
+    }
+
+    static boolean nullable(String field)
+    {
+        return nullable_fields_.contains(field);
     }
 
     TreeMap<String, String> getValues()

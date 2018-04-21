@@ -57,13 +57,18 @@ public class StudentsJournal
         ArrayList<String> fields = new ArrayList<>();
         ArrayList<String> values = new ArrayList<>();
 
-        for (Map.Entry<String, String> entry : student.getValues().entrySet())
+        for (String field : Student.getFields())
         {
-            if (entry.getKey().equals(Student.ID) && entry.getValue() == null)
+            final String value = student.getValues().get(field);
+
+            if (field.equals(Student.ID) && value == null)
                 continue;
 
-            fields.add(entry.getKey());
-            values.add("'" + entry.getValue() + "'");
+            if (value == null && !Student.nullable(field))
+                throw new JournalException("field '" + field + "' can't be nullable");
+
+            fields.add(field);
+            values.add("'" + value + "'");
         }
 
         try
@@ -89,23 +94,29 @@ public class StudentsJournal
         }
     }
 
-    public ArrayList<Student> getAllStudents() throws JournalException
+    public ArrayList<Student> getStudents(ArrayList<String> conditions) throws JournalException
     {
         try
         {
-            ArrayList<String> fields = Student.getFields();
+            ArrayList<String> fields_to_select = Student.getFields();
             ArrayList<Student> students = new ArrayList<>();
 
-            ArrayList<String> students_info = DBManager.getDB(db_name_).execSQL(DBQuery.select(Student.getTableName(), fields));
+            ArrayList<String> students_info = DBManager.getDB(db_name_).execSQL(DBQuery.selectWithCondition(Student.getTableName(), fields_to_select, conditions));
 
             for (int i = 0; i < students_info.size(); i += Student.fieldsNum())
             {
                 Student student = new Student();
 
-                for (int j = 0; j < fields.size(); ++j)
+                for (int j = 0; j < fields_to_select.size(); ++j)
                 {
-                    if (!student.setFieldByName(fields.get(j), students_info.get(j + i)))
-                        throw new JournalException("failed to assign value '" + students_info.get(j + i) + "' to field '" + fields.get(j) + "'");
+                    try
+                    {
+                        student.setFieldByName(fields_to_select.get(j), students_info.get(j + i));
+                    }
+                    catch (InvalidDataException ex)
+                    {
+                        throw new JournalException("failed to assign value '" + students_info.get(j + i) + "' to field '" + fields_to_select.get(j) + "'");
+                    }
                 }
 
                 students.add(student);
@@ -115,8 +126,13 @@ public class StudentsJournal
         }
         catch (DBException ex)
         {
-            throw new JournalException("failed to select students from '" + db_name_ + "' database", ex);
+            throw new JournalException("failed to select students from database '" + db_name_ + "'", ex);
         }
+    }
+
+    public ArrayList<Student> getAllStudents() throws JournalException
+    {
+        return getStudents(null);
     }
 
     private void createStudentsTableIfNotExists() throws DBException

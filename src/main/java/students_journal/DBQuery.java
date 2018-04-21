@@ -23,13 +23,27 @@ public class DBQuery
         return "DELETE FROM " + table_name + " WHERE id = " + String.valueOf(id);
     }
 
-    public static String select(String table_name, ArrayList<String> fields)
+    public static String select(String table_name, ArrayList<String> fields_to_select)
     {
-        final String joined_fields = join(fields, ',');
-        return "SELECT " + joined_fields + " FROM " + table_name;
+        return selectWithCondition(table_name, fields_to_select, null);
     }
 
-    //================================================================
+    public static String selectWithCondition(String table_name, ArrayList<String> fields_to_select, ArrayList<String> conditions)
+    {
+        String where_part = "";
+
+        if (conditions != null && !conditions.isEmpty())
+            where_part = join(conditions, ',');
+
+        final String joined_fields = join(fields_to_select, ',');
+        String sql = "SELECT " + joined_fields + " FROM " + table_name;
+
+        if (!where_part.isEmpty())
+            sql += " WHERE " + where_part;
+
+        return sql;
+    }
+
     private static String join(ArrayList<String> array_list, char delimiter)
     {
         StringBuilder sb = new StringBuilder();
