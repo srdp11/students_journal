@@ -38,6 +38,23 @@ public class Database
         }
     }
 
+    public boolean tableExists(String table_name) throws DBException
+    {
+        try
+        {
+            DatabaseMetaData metadata = connection_.getMetaData();
+
+            try (ResultSet rs = metadata.getTables(null, null, table_name, null))
+            {
+                return rs.next();
+            }
+        }
+        catch (SQLException ex)
+        {
+            throw new DBException("failed to get info about table '" + table_name + "'");
+        }
+    }
+
     public void closeDB() throws DBException
     {
         try

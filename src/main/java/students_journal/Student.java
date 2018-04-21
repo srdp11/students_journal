@@ -1,61 +1,142 @@
 package students_journal;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.TreeMap;
 
 public class Student
 {
-    private String name_;
-    private String second_name_;
-    private String patronymic_;
-    private String group_;
-    private Date birthday_;
-    private Integer personal_id_;
+    private static final String TABLE_NAME = "students";
 
-    public void setName(String name) {
-        this.name_ = name;
+    private static final String ID = "id";
+    private static final String NAME = "name";
+    private static final String SECOND_NAME = "second_name";
+    private static final String PATRONYMIC = "patronymic";
+    private static final String GROUP = "group";
+    private static final String BIRTHDAY = "birthday";
+
+    private static ArrayList<String> fields_;
+
+    static
+    {
+        fields_ = new ArrayList<>();
+        fields_.add(ID);
+        fields_.add(NAME);
+        fields_.add(SECOND_NAME);
+        fields_.add(PATRONYMIC);
+        fields_.add(GROUP);
+        fields_.add(BIRTHDAY);
     }
 
-    public String getName() {
-        return name_;
+    private TreeMap<String, String> values_ = new TreeMap<>();
+
+    public void setName(String name)
+    {
+        values_.put(NAME, name);
     }
 
-    public void setSecondName(String second_name) {
-        this.second_name_ = second_name;
+    public String getName()
+    {
+        return values_.get(NAME);
     }
 
-    public String getSecondName() {
-        return second_name_;
+    public void setSecondName(String second_name)
+    {
+        values_.put(SECOND_NAME, second_name);
     }
 
-    public void setPatronymic(String patronymic) {
-        this.patronymic_ = patronymic;
+    public String getSecondName()
+    {
+        return values_.get(SECOND_NAME);
     }
 
-    public String getPatronymic() {
-        return patronymic_;
+    public void setPatronymic(String patronymic)
+    {
+        values_.put(PATRONYMIC, patronymic);
     }
 
-    public void setGroup(String group) {
-        this.group_ = group;
+    public String getPatronymic()
+    {
+        return values_.get(PATRONYMIC);
     }
 
-    public String getGroup() {
-        return group_;
+    public void setGroup(String group)
+    {
+        values_.put(GROUP, group);
     }
 
-    public void setBirthday(Date birthday) {
-        this.birthday_ = birthday;
+    public String getGroup()
+    {
+        return values_.get(PATRONYMIC);
     }
 
-    public Date getBirthday() {
-        return birthday_;
+    public void setBirthday(Date birthday)
+    {
+        values_.put(BIRTHDAY, birthday.toString());
     }
 
-    public void setPersonalID(Integer personal_id) {
-        this.personal_id_ = personal_id;
+    public Date getBirthday()
+    {
+        try
+        {
+            return new SimpleDateFormat("dd.MM.yyyy").parse(values_.get(BIRTHDAY));
+        }
+        catch (ParseException ex)
+        {
+            return null;
+        }
     }
 
-    public Integer getPersonalID() {
-        return personal_id_;
+    public void setPersonalID(Integer personal_id)
+    {
+        values_.put(ID, String.valueOf(personal_id));
+    }
+
+    public Integer getPersonalID()
+    {
+        return Integer.valueOf(values_.get(ID));
+    }
+
+    boolean setFieldByName(String field, String value)
+    {
+        if (!fields_.contains(field))
+            return false;
+
+        if (field.equals(BIRTHDAY))
+        {
+            try
+            {
+                new SimpleDateFormat("dd.MM.yyyy").parse(value);
+            }
+            catch (ParseException ex)
+            {
+                return false;
+            }
+        }
+
+        values_.put(field, value);
+        return true;
+    }
+
+    public static String getTableName()
+    {
+        return TABLE_NAME;
+    }
+
+    public static ArrayList<String> getFields()
+    {
+        return fields_;
+    }
+
+    public static int fieldsNum()
+    {
+        return fields_.size();
+    }
+
+    public TreeMap<String, String> getValues()
+    {
+        return values_;
     }
 }

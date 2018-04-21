@@ -13,11 +13,11 @@ public class DBManager
 
     private static TreeMap<String, Database> databases_ =  new TreeMap<>();
 
-    public static void initConnection(String db_name) throws DBException
+    public static void initDB(String db_name) throws DBException
     {
         createDBFolderIfNotExists();
 
-        if (getDBConnection(db_name) != null)
+        if (getDB(db_name) != null)
             throw new DBException("connection for '" + db_name + "' is already init");
 
         try
@@ -31,7 +31,7 @@ public class DBManager
 
         try
         {
-            Connection connection = DriverManager.getConnection(SQLITE_PREFIX + "/" + db_name);
+            Connection connection = DriverManager.getConnection(SQLITE_PREFIX + "./" + DB_FOLDER + "/" + db_name);
 
             if (connection == null)
                 throw new DBException("connection for db '" + db_name + "' is null");
@@ -44,9 +44,15 @@ public class DBManager
         }
     }
 
-    public static Database getDBConnection(String db_name)
+    public static Database getDB(String db_name)
     {
         return databases_.get(db_name);
+    }
+
+    private static String getDBPath(String db_name)
+    {
+        File curr_dir = new File("");
+        return curr_dir.getAbsolutePath() + "/" + DB_FOLDER + "/" + db_name;
     }
 
     private static void createDBFolderIfNotExists() throws DBException

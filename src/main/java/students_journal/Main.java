@@ -1,13 +1,9 @@
 package students_journal;
 
-import java.io.File;
-
 public class Main
 {
-
-    public static void main(String[] args) throws DBException
+    public static void main(String[] args) throws DBException, JournalException
     {
-        File curr_dir = new File("");
-        DBManager.initConnection(curr_dir.getAbsolutePath() + "/databases/foo.db");
+        StudentsJournal.removeStudentByID(12);
     }
 }
