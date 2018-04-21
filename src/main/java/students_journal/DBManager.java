@@ -49,6 +49,12 @@ public class DBManager
         return databases_.get(db_name);
     }
 
+    public static void closeDB(String db_name) throws DBException
+    {
+        if (databases_.get(db_name) != null)
+            databases_.remove(db_name);
+    }
+
     private static String getDBPath(String db_name)
     {
         File curr_dir = new File("");

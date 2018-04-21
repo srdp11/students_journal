@@ -10,11 +10,11 @@ public class Student
 {
     private static final String TABLE_NAME = "students";
 
-    private static final String ID = "id";
+    public static final String ID = "id";
     private static final String NAME = "name";
     private static final String SECOND_NAME = "second_name";
     private static final String PATRONYMIC = "patronymic";
-    private static final String GROUP = "group";
+    private static final String GROUP = "study_group";
     private static final String BIRTHDAY = "birthday";
 
     private static ArrayList<String> fields_;
@@ -32,8 +32,11 @@ public class Student
 
     private TreeMap<String, String> values_ = new TreeMap<>();
 
-    public void setName(String name)
+    public void setName(String name) throws InvalidDataException
     {
+        if (name == null)
+            throw new InvalidDataException("name can not be null");
+
         values_.put(NAME, name);
     }
 
@@ -42,8 +45,11 @@ public class Student
         return values_.get(NAME);
     }
 
-    public void setSecondName(String second_name)
+    public void setSecondName(String second_name) throws InvalidDataException
     {
+        if (second_name == null)
+            throw new InvalidDataException("second name can not be null");
+
         values_.put(SECOND_NAME, second_name);
     }
 
@@ -62,19 +68,25 @@ public class Student
         return values_.get(PATRONYMIC);
     }
 
-    public void setGroup(String group)
+    public void setGroup(String group) throws InvalidDataException
     {
+        if (group == null)
+            throw new InvalidDataException("group can not be null");
+
         values_.put(GROUP, group);
     }
 
     public String getGroup()
     {
-        return values_.get(PATRONYMIC);
+        return values_.get(GROUP);
     }
 
-    public void setBirthday(Date birthday)
+    public void setBirthday(Date birthday) throws InvalidDataException
     {
-        values_.put(BIRTHDAY, birthday.toString());
+        if (birthday == null)
+            throw new InvalidDataException("birthday can not be null");
+
+        values_.put(BIRTHDAY, new SimpleDateFormat("dd.MM.yyyy").format(birthday));
     }
 
     public Date getBirthday()
@@ -89,13 +101,21 @@ public class Student
         }
     }
 
-    public void setPersonalID(Integer personal_id)
+    public String getStrBirthday()
     {
-        values_.put(ID, String.valueOf(personal_id));
+        return values_.get(BIRTHDAY);
     }
 
-    public Integer getPersonalID()
+    public void setID(int id) throws InvalidDataException
     {
+        values_.put(ID, String.valueOf(id));
+    }
+
+    public Integer getID()
+    {
+        if (values_.get(ID) == null)
+            return null;
+
         return Integer.valueOf(values_.get(ID));
     }
 
@@ -116,26 +136,54 @@ public class Student
             }
         }
 
+        if (value.equals("null"))
+            value = null;
+
         values_.put(field, value);
         return true;
     }
 
-    public static String getTableName()
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other == this)
+            return false;
+
+        if (!(other instanceof Student))
+            return false;
+
+        Student student = (Student)other;
+
+        return Utils.equals(getName(), student.getName()) &&
+                Utils.equals(getSecondName(), student.getSecondName()) &&
+                Utils.equals(getPatronymic(), student.getPatronymic()) &&
+                Utils.equals(getGroup(), student.getGroup()) &&
+                Utils.equals(getBirthday(), student.getBirthday());
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("[name=%s, second_name=%s, patronymic=%s, group=%s, birthday=%s]",
+                             getName(), getSecondName(), getPatronymic(), getGroup(), getStrBirthday());
+    }
+
+    static String getTableName()
     {
         return TABLE_NAME;
     }
 
-    public static ArrayList<String> getFields()
+    static ArrayList<String> getFields()
     {
         return fields_;
     }
 
-    public static int fieldsNum()
+    static int fieldsNum()
     {
         return fields_.size();
     }
 
-    public TreeMap<String, String> getValues()
+    TreeMap<String, String> getValues()
     {
         return values_;
     }

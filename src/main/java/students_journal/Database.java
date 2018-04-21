@@ -16,17 +16,23 @@ public class Database
     {
         try (Statement statement = connection_.createStatement())
         {
+            ArrayList<String> result = new ArrayList<>();
+
+            if (!sql.startsWith("SELECT"))
+            {
+                statement.executeUpdate(sql);
+                return result;
+            }
+
             try (ResultSet data = statement.executeQuery(sql))
             {
-                ArrayList<String> result = new ArrayList<>();
-
                 final ResultSetMetaData metadata = data.getMetaData();
                 final int column_count = metadata.getColumnCount();
 
                 while (data.next())
                 {
                     for (int i = 1; i <= column_count; ++i)
-                        result.add(metadata.getColumnName(i));
+                        result.add(data.getString(i));
                 }
 
                 return result;

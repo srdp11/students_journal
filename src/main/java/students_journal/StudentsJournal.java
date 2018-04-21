@@ -5,21 +5,51 @@ import java.util.Map;
 
 public class StudentsJournal
 {
-    public static final String DB_NAME = "statistics.db";
+    private final String db_name_;
 
-    static
+    public StudentsJournal(String db_name)
+    {
+        db_name_ = db_name;
+    }
+
+    public void initJournal() throws JournalException
     {
         try
         {
-            DBManager.initDB(DB_NAME);
+            DBManager.initDB(db_name_);
+            createStudentsTableIfNotExists();
         }
         catch (DBException ex)
         {
-            throw new RuntimeException("failed to init db '" + DB_NAME + "'", ex);
+            throw new JournalException("failed to open journal in '" + db_name_ + "'", ex);
         }
     }
 
-    public static void addStudent(Student student) throws JournalException
+    public void clearJournal() throws JournalException
+    {
+        try
+        {
+            DBManager.getDB(db_name_).execSQL("DELETE FROM " + Student.getTableName());
+        }
+        catch (DBException ex)
+        {
+            throw new JournalException("failed to add student " + "" + " to database", ex);
+        }
+    }
+
+    public void closeJournal() throws JournalException
+    {
+        try
+        {
+            DBManager.closeDB(db_name_);
+        }
+        catch (DBException ex)
+        {
+            throw new JournalException("failed to close journal in '" + db_name_ + "'", ex);
+        }
+    }
+
+    public void addStudent(Student student) throws JournalException
     {
         if (student == null)
             throw new JournalException("student record is null");
@@ -29,25 +59,28 @@ public class StudentsJournal
 
         for (Map.Entry<String, String> entry : student.getValues().entrySet())
         {
+            if (entry.getKey().equals(Student.ID) && entry.getValue() == null)
+                continue;
+
             fields.add(entry.getKey());
-            values.add(entry.getValue());
+            values.add("'" + entry.getValue() + "'");
         }
 
         try
         {
-            DBManager.getDB(DB_NAME).execSQL(DBQuery.insertInto(Student.getTableName(), fields, values));
+            DBManager.getDB(db_name_).execSQL(DBQuery.insertInto(Student.getTableName(), fields, values));
         }
         catch (DBException ex)
         {
-            throw new JournalException("failed to add student " + "" + " to database");
+            throw new JournalException("failed to add student " + "" + " to database", ex);
         }
     }
 
-    public static void removeStudentByID(int id) throws JournalException
+    public void removeStudentByID(int id) throws JournalException
     {
         try
         {
-            Database db = DBManager.getDB(DB_NAME);
+            Database db = DBManager.getDB(db_name_);
             db.execSQL(DBQuery.deleteWithID(Student.getTableName(), id));
         }
         catch (DBException ex)
@@ -56,14 +89,14 @@ public class StudentsJournal
         }
     }
 
-    public static ArrayList<Student> getAllStudents() throws JournalException
+    public ArrayList<Student> getAllStudents() throws JournalException
     {
         try
         {
             ArrayList<String> fields = Student.getFields();
             ArrayList<Student> students = new ArrayList<>();
 
-            ArrayList<String> students_info = DBManager.getDB(DB_NAME).execSQL(DBQuery.select(Student.getTableName(), fields));
+            ArrayList<String> students_info = DBManager.getDB(db_name_).execSQL(DBQuery.select(Student.getTableName(), fields));
 
             for (int i = 0; i < students_info.size(); i += Student.fieldsNum())
             {
@@ -74,27 +107,29 @@ public class StudentsJournal
                     if (!student.setFieldByName(fields.get(j), students_info.get(j + i)))
                         throw new JournalException("failed to assign value '" + students_info.get(j + i) + "' to field '" + fields.get(j) + "'");
                 }
+
+                students.add(student);
             }
 
             return students;
         }
         catch (DBException ex)
         {
-            throw new JournalException("failed to select students from '" + DB_NAME + "' database");
+            throw new JournalException("failed to select students from '" + db_name_ + "' database", ex);
         }
     }
 
-    private static void createStudentsTableIfNotExists() throws DBException
+    private void createStudentsTableIfNotExists() throws DBException
     {
         final String fields = "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                 " name TEXT," +
                 " second_name TEXT," +
                 " patronymic TEXT," +
-                " group TEXT," +
+                " study_group TEXT," +
                 " birthday TEXT";
 
         final String create_table_sql = "CREATE TABLE IF NOT EXISTS " + Student.getTableName() + "(" + fields + ")";
 
-        DBManager.getDB(DB_NAME).execSQL(create_table_sql);
+        DBManager.getDB(db_name_).execSQL(create_table_sql);
     }
 }
