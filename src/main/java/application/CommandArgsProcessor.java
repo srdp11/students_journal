@@ -22,7 +22,10 @@ public class CommandArgsProcessor
     public void process() throws InvalidDataException, JournalException, ProgramArgsException
     {
         if (args_.length == 0)
-            throw new ProgramArgsException("wrong usage: available commands --add, --remove, --show");
+        {
+            System.out.println("use --help for obtain info about program");
+            return;
+        }
 
         final String command = args_[0];
 
@@ -118,9 +121,9 @@ public class CommandArgsProcessor
 
         sb.append("usage: students_journal [--help] <command> [<args>]").append(System.lineSeparator());
         sb.append("Commands:").append(System.lineSeparator());
-        sb.append("--add [field=value]: ").append("add new student to journal with specified [field=value] (fields: id, name, second_name, patronymic, study_group, birthday (dd.MM.yyyy)").append(System.lineSeparator());
+        sb.append("--add <[field=value]>: ").append("add new student to journal with specified [field=value] (fields: id, name, second_name, patronymic, study_group, birthday (dd.MM.yyyy))").append(System.lineSeparator());
         sb.append("--remove <id>: ").append("remove student with specified <id>").append(System.lineSeparator());
-        sb.append("--show [field=value]: ").append("show info about students. if args not specified show all students, otherwise only students which satisfied conditions <field=value>.").append(System.lineSeparator());
+        sb.append("--show <[field=value]>: ").append("show info about students. if args not specified show all students, otherwise only students which satisfied conditions <field=value>.").append(System.lineSeparator());
         sb.append(System.lineSeparator()).append("Examples: ").append(System.lineSeparator());
         sb.append("add: students_journal --add name=Vasya second_name=Petrov patronymic=Vasilevich study_group=VM-11 birthday=02.02.1997").append(System.lineSeparator());
         sb.append("remove: students_journal --remove 4").append(System.lineSeparator());
