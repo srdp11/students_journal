@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class Student
@@ -164,8 +165,19 @@ public class Student
     @Override
     public String toString()
     {
-        return String.format("[name=%s, second_name=%s, patronymic=%s, group=%s, birthday=%s]",
-                             getName(), getSecondName(), getPatronymic(), getGroup(), getStrBirthday());
+        StringBuilder sb = new StringBuilder();
+
+        for (String curr_field : fields_)
+        {
+            final String curr_val = values_.get(curr_field);
+
+            if (curr_val != null)
+                sb.append(curr_field).append("=").append(curr_val).append(",");
+        }
+
+        sb.deleteCharAt(sb.length() - 1);
+
+        return sb.toString();
     }
 
     static String getTableName()
